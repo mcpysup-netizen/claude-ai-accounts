@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif">
+  <rect width="960" height="520" rx="20" fill="#fbf8f1"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1b2a4a"/></marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ff8649"/></marker>
+  </defs>
+
+  <text x="40" y="52" font-size="22" font-weight="700" fill="#1b2a4a">Shared settings, a separate login per account</text>
+  <text x="40" y="80" font-size="14" fill="#5b6478">ai claude &lt;account&gt; only swaps the login folder. Hooks, memory, plugins and MCP settings stay the same.</text>
+
+  <!-- shared -->
+  <rect x="40" y="110" width="330" height="370" rx="16" fill="#1b2a4a"/>
+  <text x="64" y="146" font-size="17" font-weight="700" fill="#fff">Shared ~/.claude</text>
+  <text x="64" y="168" font-size="13" fill="#aab3c8">Used by every account</text>
+  <g font-size="14" fill="#e6e9f2">
+    <rect x="64" y="186" width="282" height="40" rx="8" fill="#26375c"/><text x="80" y="211">settings.json · hooks · status line</text>
+    <rect x="64" y="234" width="282" height="40" rx="8" fill="#26375c"/><text x="80" y="259">project memory · chat history</text>
+    <rect x="64" y="282" width="282" height="40" rx="8" fill="#26375c"/><text x="80" y="307">plugins · skills · this mod</text>
+    <rect x="64" y="330" width="282" height="40" rx="8" fill="#26375c"/><text x="80" y="355">MCP server settings (.claude.json)</text>
+  </g>
+  <text x="64" y="408" font-size="13" fill="#aab3c8">Account folders symlink to these.</text>
+  <text x="64" y="430" font-size="13" fill="#aab3c8">Change once, every account sees it.</text>
+
+  <!-- per-account -->
+  <g>
+    <rect x="590" y="110" width="330" height="108" rx="16" fill="#fff" stroke="#d9d3c4" stroke-width="2"/>
+    <text x="614" y="144" font-size="16" font-weight="700" fill="#1b2a4a">C-MAIN · default login</text>
+    <text x="614" y="170" font-size="13" fill="#5b6478">~/.claude/.credentials.json</text>
+    <text x="614" y="194" font-size="13" fill="#5b6478">left exactly as it was</text>
+
+    <rect x="590" y="236" width="330" height="108" rx="16" fill="#fff4ec" stroke="#ff8649" stroke-width="2.5"/>
+    <text x="614" y="270" font-size="16" font-weight="700" fill="#1b2a4a">C-WORK · account folder</text>
+    <text x="614" y="296" font-size="13" fill="#5b6478">~/.claude-accounts/work/</text>
+    <text x="614" y="320" font-size="13" fill="#c2541f">only login + account keys are separate</text>
+
+    <rect x="590" y="362" width="330" height="118" rx="16" fill="#fff" stroke="#d9d3c4" stroke-width="2"/>
+    <text x="614" y="396" font-size="16" font-weight="700" fill="#1b2a4a">G-MAIN · G-WORK · Codex</text>
+    <text x="614" y="422" font-size="13" fill="#5b6478">one CODEX_HOME folder per account</text>
+    <text x="614" y="446" font-size="13" fill="#5b6478">auth.json and history separate, config linked</text>
+  </g>
+
+  <!-- links -->
+  <path d="M590 164 C480 164 470 250 372 250" fill="none" stroke="#1b2a4a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a)"/>
+  <path d="M590 290 C480 290 470 290 372 290" fill="none" stroke="#ff8649" stroke-width="3" marker-end="url(#o)"/>
+  <path d="M590 420 C480 420 470 340 372 340" fill="none" stroke="#1b2a4a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a)"/>
+  <text x="408" y="278" font-size="13" fill="#c2541f" font-weight="700">shared via links</text>
+</svg>
