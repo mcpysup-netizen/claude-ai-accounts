@@ -193,6 +193,7 @@ Claude Code에서 `/plugin uninstall ai-accounts`로 모드를 지웁니다. 등
 
 같이 보면 좋은 글
 
+- [클로드 코드·코덱스 계정 여러 개, 세션마다 골라 쓰고 한도 차면 전환](https://mcpy.kr/ko/blog/claude-code-account-switch-guide?utm_source=github&utm_medium=referral&utm_campaign=claude-ai-accounts&utm_content=related_intro) (이 도구 소개 글)
 - [클로드 요금제 가격 비교: 무료·프로·맥스 사용량 한도 정리](https://mcpy.kr/ko/blog/claude-plans-price-usage-limits-2026?utm_source=github&utm_medium=referral&utm_campaign=claude-ai-accounts&utm_content=related)
 - [클로드 코드 토큰 사용량이 빨리 줄어드는 이유와 줄이는 법](https://mcpy.kr/ko/blog/claude-code-token-usage-guide?utm_source=github&utm_medium=referral&utm_campaign=claude-ai-accounts&utm_content=related)
 - [클로드 코드 설치와 요금제, 사용량 한도 정리](https://mcpy.kr/ko/blog/claude-code-install-price-usage-limits-2026?utm_source=github&utm_medium=referral&utm_campaign=claude-ai-accounts&utm_content=related)
