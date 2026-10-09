@@ -7,8 +7,8 @@
 <h1 align="center">claude-ai-accounts</h1>
 
 <p align="center">
-  Pick a Claude Code or Codex (ChatGPT) subscription <b>per session</b>,<br>
-  see what is left right above the prompt, and <b>switch with one click</b>.
+  For <b>Claude Code</b> and <b>Codex</b> alike: pick a subscription <b>per session</b>,<br>
+  see what is left, and <b>switch the moment you need to</b>.
 </p>
 
 <p align="center">
@@ -23,15 +23,15 @@
 
 ## At a glance
 
-- **Pin an account per session.** Work repo on the work account, side project on your personal one: sessions A and B run on different accounts at the same time, with no logout and login dance.
-- **Switch in place when a limit runs out.** Move to an account with room left and keep the same conversation.
-- Remaining **5-hour and 7-day limits plus reset times** for every account sit above the prompt. Click a name and the same pane restarts on that account.
-- Hooks, memory, plugins and MCP settings are **shared by every account**. Only the login files are per account.
+- **Pin an account per session, in Claude Code and in Codex.** `ai claude C-WORK`, `ai codex G-MAIN`. Window A on your work Claude, B on your personal Claude, C on your work ChatGPT, all at once, never mixed, with no logout and login dance.
+- **Switch as soon as a limit runs out.** A Claude Code session restarts in the same pane on another account and keeps the conversation; Codex called from inside Claude moves to the new account on its next call.
+- **One table for both tools.** Remaining 5-hour and 7-day limits plus reset times for every Claude and ChatGPT account, via `ai status` or the strip above the prompt.
+- **Shared settings, separate logins.** Claude's hooks, memory, plugins and MCP settings, and Codex's `config.toml`, `AGENTS.md` and skills are shared by every account.
 - No undocumented APIs, and the tool never reads or stores your tokens.
 
 <p align="center">
   <img src="docs/images/band-demo.png" alt="The account table above the Claude Code prompt. C-MAIN has 66% of its 5-hour limit left and C-WORK 8%; G-MAIN and G-WORK have 82% and 37% of their 7-day limits left" width="100%">
-  <br><sub>A real screenshot with demo accounts. ▶ marks the accounts this session uses; colors go from green to yellow to red as the limit runs out. The UI text is in Korean for now.</sub>
+  <br><sub>A real screenshot with demo accounts. C- rows are Claude accounts, G- rows are ChatGPT (Codex) accounts. ▶ marks the accounts this session uses; colors go from green to yellow to red as the limit runs out. The UI text is in Korean for now.</sub>
 </p>
 
 ## Quick start
@@ -39,10 +39,15 @@
 ```bash
 git clone https://github.com/mcpysup-netizen/claude-ai-accounts.git
 cd claude-ai-accounts && ./install.sh
-ai add claude work C-WORK company && ai login claude C-WORK
+
+ai add claude work C-WORK company && ai login claude C-WORK   # add a Claude account
+ai add codex  work G-WORK company && ai login codex  G-WORK   # add a ChatGPT (Codex) account
+
+ai claude C-WORK      # this session runs on the work Claude
+ai codex  G-WORK      # this session runs on the work ChatGPT
 ```
 
-Then start `claude` inside tmux and type this at the prompt (answer `y`, then pick `user`):
+That alone gives you per-session accounts in both tools. For the strip above the prompt (limits table and click-to-switch), start `claude` inside tmux and type (answer `y`, then pick `user`):
 
 ```text
 /plugin install ai-accounts --marketplace mcpysup-netizen/claude-ai-accounts
@@ -54,47 +59,45 @@ Then start `claude` inside tmux and type this at the prompt (answer `y`, then pi
 
 <p align="center"><img src="docs/images/en/limit.jpg" alt="A paper figure stops at a closed door next to an empty fuel gauge, while a full orange gauge sits across a gap with no bridge" width="88%"></p>
 
-With several subscriptions, there are two moments when you want to choose the account.
+With several Claude and ChatGPT subscriptions, there are two moments when you want to choose the account.
 
-**Some sessions should always run on a specific account.** Company repos on the company account, personal projects on your own. But the Claude Code login is machine-wide, so switching it also switched every other open session. There was no way to give each session its own account.
+**Some sessions should always run on a specific account.** Company repos on the company account, personal projects on your own. But both Claude Code and Codex keep one machine-wide login (`~/.claude`, `~/.codex`), so switching it also switched every other open session. There was no way to give each session its own account.
 
-**And sometimes a limit runs out.** When one account hits its 5-hour limit, that session stops. Another account may have plenty left, but getting there meant `/logout`, `/login`, a browser approval and a broken conversation.
+**And sometimes a limit runs out.** Claude and Codex both have 5-hour and weekly limits, and when one hits, that session stops. Another account may have plenty left, but getting there meant logging out, logging in and approving in the browser again.
 
-This tool handles both the same way: pick the account when you start a session with `ai claude <account>`, and click a name in the strip if you need to change it midway. I built it to split two Claude and two ChatGPT subscriptions like this every day, then cleaned it up for others. Most pitfalls below are ones I actually hit.
+This tool handles both the same way: pick the account when you start a session with `ai claude <account>` or `ai codex <account>`, and click a name in the strip if you need to change it midway. I built it to split two Claude and two ChatGPT subscriptions like this every day, then cleaned it up for others. Most pitfalls below are ones I actually hit.
 
 ## Shared settings, separate logins
 
 <p align="center"><img src="docs/images/en/how-it-works.svg" alt="Diagram: account boxes C-MAIN, C-WORK and G-MAIN/G-WORK link to one shared ~/.claude box holding settings and hooks, memory and chat history, plugins and skills, and MCP settings" width="100%"></p>
 
-Claude Code can move its config folder with `CLAUDE_CONFIG_DIR` ([docs](https://code.claude.com/docs/en/env-vars)). But giving each account a whole folder of its own **silently splits hooks, memory, plugins and MCP settings.** A hook you fix on account A never runs on account B, and B forgets last week's memory.
+Both tools can move their login folder with an environment variable: `CLAUDE_CONFIG_DIR` for Claude Code ([docs](https://code.claude.com/docs/en/env-vars)) and `CODEX_HOME` for Codex ([docs](https://learn.chatgpt.com/docs/config-file/config-advanced)). But giving each account a whole folder of its own **silently splits your settings too.** A hook or `AGENTS.md` you fix on account A never applies on account B, and B forgets last week's memory.
 
-So an account folder holds **only the login file for real; everything else is a symlink back to `~/.claude`.**
+So an account folder holds **only the login for real; everything else is a symlink back to the original folder.**
 
 ```text
-~/.claude-accounts/work/
-├── .credentials.json     ← this account's login (written by Claude itself)
-├── .claude.json          ← copy of shared settings + this account's keys
-└── settings.json, projects/, plugins/, ...  → ~/.claude/... (symlinks)
+~/.claude-accounts/work/                      ~/.codex-accounts/work/
+├── .credentials.json   ← Claude login         ├── auth.json        ← Codex login
+├── .claude.json        ← account keys only    ├── sessions/        ← this account's chats
+└── settings.json, projects/, plugins/ ...    └── config.toml, AGENTS.md, skills/ ...
+      → ~/.claude/... (symlinks)                     → ~/.codex/... (symlinks)
 ```
 
-`.claude.json` is the one copy, because it mixes shared settings (like the MCP server list) with "who is logged in". Each launch re-copies the shared part and keeps only the account keys (`oauthAccount` and friends).
-
-Codex works the same way: one `CODEX_HOME` per account ([docs](https://learn.chatgpt.com/docs/config-file/config-advanced)), with `config.toml`, `AGENTS.md`, skills and rules linked to `~/.codex`. Your existing default logins (`~/.claude`, `~/.codex`) are left untouched.
+On the Claude side, `.claude.json` is the one copy, because it mixes shared settings (like the MCP server list) with "who is logged in". Each launch re-copies the shared part and keeps only the account keys (`oauthAccount` and friends). On the Codex side, chat history (`sessions/`) is kept per account. Your existing default logins (`~/.claude`, `~/.codex`) are left untouched.
 
 <p align="center"><img src="docs/images/en/shared.jpg" alt="A large paper drawer cabinet with three small safes in front, each with its own key; only the orange safe is open and tied to the cabinet by a string" width="88%"></p>
 
-## Same pane, new account, same chat
+## Switching midway
 
 <p align="center"><img src="docs/images/en/swap.jpg" alt="One terminal window whose chat bubbles stay the same while the name tag at the top turns from gray to orange, with circular arrows" width="88%"></p>
 
-You cannot change the login of a running Claude session from outside. So instead of changing it, the tool **restarts it in place.** Click another Claude account in the strip and:
+You cannot change the login of a running session from outside, so each case works a little differently.
 
-1. `ai swap` finds the `claude` process in the current tmux pane and reads its original arguments (permission mode and so on).
-2. Half a second later it respawns that pane as `ai claude <new account> <original args> --resume <this session>`.
+**Claude Code session: restart in the same pane, keep the conversation.** Click another Claude account in the strip and `ai swap` reads the original arguments (permission mode and so on) from the `claude` process in the current tmux pane, then half a second later respawns that pane as `ai claude <new account> <original args> --resume <this session>`. Layout, permission mode and conversation stay; only the login changes.
 
-Layout, permission mode and conversation stay; only the login changes. The half-second delay exists because if Claude shut down before receiving the "switching" reply, the click would look like a failure.
+**Codex called from inside Claude: no restart at all.** Click a G- account and the next Codex call uses it. The Codex plugin shares one broker process per working folder, which can end up running on whichever session's account started it first, so the mod prefixes Codex commands with this session's `CODEX_HOME` and gives each account its own broker.
 
-**ChatGPT accounts need no restart.** Click a G- account and the next Codex call uses it. The Codex plugin shares one broker process per working folder, which can end up running on whichever session's account started it first. So the mod prefixes Codex commands with this session's `CODEX_HOME` and gives each account its own broker.
+**Standalone Codex session: start it again on the new account.** `/exit`, then `ai codex <new account>`. Because chat history lives in each account's folder, the conversation does not follow you to another account; within the same account, `ai codex G-WORK resume` picks it up again.
 
 ## Where the numbers come from
 
@@ -116,8 +119,8 @@ Calling the private endpoint behind `/usage` with your token would make Claude l
 | Linux or WSL | in-place switching reads `/proc`; no macOS yet |
 | `python3`, `bash` | |
 | [Claude Code](https://code.claude.com/docs) 2.1.29x | for mods (plugin hooks); tested on 2.1.295 |
-| `tmux` | for click-to-switch; `ai claude <account>` works without it |
-| Codex CLI (optional) | only for ChatGPT accounts |
+| `tmux` | for click-to-switch; `ai claude` and `ai codex` work without it |
+| Codex CLI | for ChatGPT accounts |
 
 **1. Install.** `./install.sh` creates `~/.local/bin/ai` and a registry at `~/.config/ai-accounts/accounts.json`, registering your current logins as `C-MAIN` and `G-MAIN`. It is safe to re-run and never overwrites an existing registry or status line.
 
@@ -140,17 +143,14 @@ ai login codex G-WORK
 
 ## Usage
 
-| To | Run |
-|---|---|
-| run this session on the work account from the start | `ai claude C-WORK` |
-| Claude on C-WORK, Codex on G-MAIN | `ai claude C-WORK gpt:G-MAIN` |
-| continue a chat on another account | `ai claude C-WORK --resume <session-id>` |
-| run Codex on an account | `ai codex G-WORK` |
-| list remaining limits | `ai status` |
-| switch the current pane | click a name in the strip, or `/ai C-WORK` |
-| open the donut panel | `/ai` |
+| To | Claude Code | Codex |
+|---|---|---|
+| run this session on the work account from the start | `ai claude C-WORK` | `ai codex G-WORK` |
+| continue an earlier chat | `ai claude C-WORK --resume <session-id>` | `ai codex G-WORK resume` |
+| also pick the Codex account used inside Claude | `ai claude C-WORK gpt:G-MAIN` | |
+| switch midway | click a name in the strip, or `/ai C-WORK` | inside Claude: click a G- name / standalone: start again with `ai codex <account>` |
 
-Any extra arguments after `ai claude` go straight to `claude`.
+For both tools, `ai status` lists remaining limits and `/ai` opens the donut panel. Extra arguments after `ai claude` or `ai codex` go straight to `claude` or `codex`.
 
 ## Security
 
@@ -167,12 +167,14 @@ Any extra arguments after `ai claude` go straight to `claude`.
 
 - **MCP logins are per account.** MCP *settings* are shared, but MCP *tokens* live in each account's `.credentials.json`. I once moved an automation to a new account and it stalled for exactly this reason. Log in once via `/mcp` on each new account.
 - **claude.ai connectors (Gmail, Drive and so on) belong to the account.** Unlike local MCP servers, you only see the ones connected on that account.
+- **A standalone Codex chat does not move between accounts.** History lives in each account folder (`~/.codex-accounts/<id>/sessions`), so pick the account before a long task.
 - **Clicks do nothing?** Make sure `~/.tmux.conf` has `set -g mouse on`. Outside tmux the tool tells you how to switch manually instead.
 
 ## Limitations
 
 - No macOS or native Windows yet (WSL works).
-- Unused Claude accounts cannot be checked live.
+- Unused Claude accounts cannot be checked live (Codex is refreshed live every minute).
+- The strip and click-to-switch live in Claude Code. A standalone Codex window has no strip; use `ai status` there.
 - Claude Code mods are early access and may break between releases. Please open an issue if they do.
 - Messages and the strip are in Korean for now.
 

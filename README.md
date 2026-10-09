@@ -7,8 +7,8 @@
 <h1 align="center">claude-ai-accounts</h1>
 
 <p align="center">
-  Claude Code와 Codex(ChatGPT) 구독 계정을 <b>세션마다 골라 쓰고</b>,<br>
-  남은 한도를 입력창 바로 위에서 보며 <b>클릭 한 번으로 바꾸는</b> 도구
+  <b>Claude Code</b>도 <b>Codex</b>도, 구독 계정을 <b>세션마다 골라 쓰고</b><br>
+  남은 한도를 보며 <b>필요할 때 바로 바꾸는</b> 도구
 </p>
 
 <p align="center">
@@ -23,15 +23,15 @@
 
 ## 한눈에
 
-- **세션마다 계정을 정해 둡니다.** 회사 일은 회사 계정, 개인 작업은 개인 계정처럼 세션 A와 B를 서로 다른 계정으로 동시에 띄워요. 로그아웃·로그인은 필요 없습니다.
-- **한도가 차면 그 자리에서 바꿉니다.** 한 계정이 바닥나면 넉넉한 계정으로 넘어가고, 대화는 그대로 이어져요.
-- 입력창 위에 계정별 **남은 한도(5시간·7일)와 리셋 시각**이 뜨고, 이름을 누르면 같은 칸에서 그 계정으로 다시 시작합니다.
-- 훅·메모리·플러그인·MCP 설정은 모든 계정이 **같이 쓰고**, 계정마다 따로인 건 로그인 파일뿐이에요.
+- **Claude Code도 Codex도 세션마다 계정을 정해 띄웁니다.** `ai claude C-WORK`, `ai codex G-MAIN`처럼요. 창 A는 회사 Claude, 창 B는 개인 Claude, 창 C는 회사 GPT로 동시에 돌려도 서로 섞이지 않고, 로그아웃·로그인도 필요 없어요.
+- **한도가 차면 바로 바꿉니다.** Claude Code 세션은 같은 칸에서 다른 계정으로 다시 떠서 대화가 이어지고, Claude 안에서 부르는 Codex는 다음 호출부터 바뀐 계정으로 돕니다.
+- **한 표에서 두 도구 계정을 다 봅니다.** Claude 계정과 GPT 계정의 남은 한도(5시간·7일)와 리셋 시각을 `ai status`나 입력창 위 띠에서 같이 봐요.
+- **설정은 같이, 로그인만 따로.** Claude의 훅·메모리·플러그인·MCP 설정, Codex의 `config.toml`·`AGENTS.md`·스킬은 모든 계정이 같이 씁니다.
 - 비공식 API를 부르지 않고, 토큰을 꺼내 저장하지도 않습니다.
 
 <p align="center">
   <img src="docs/images/band-demo.png" alt="Claude Code 입력창 위에 AI 계정 표가 뜬 화면. C-MAIN은 5시간 66%, C-WORK는 8% 남았고, G-MAIN과 G-WORK는 7일 82%와 37%가 남았다" width="100%">
-  <br><sub>실제 실행 화면(시연용 가짜 계정). ▶는 이 세션이 쓰는 계정이고, 남은 양이 적을수록 초록에서 노랑, 빨강으로 바뀝니다.</sub>
+  <br><sub>실제 실행 화면(시연용 가짜 계정). C-는 Claude 계정, G-는 GPT(Codex) 계정이에요. ▶는 이 세션이 쓰는 계정이고, 남은 양이 적을수록 초록에서 노랑, 빨강으로 바뀝니다.</sub>
 </p>
 
 ## 빠른 시작
@@ -39,10 +39,15 @@
 ```bash
 git clone https://github.com/mcpysup-netizen/claude-ai-accounts.git
 cd claude-ai-accounts && ./install.sh
-ai add claude work C-WORK company && ai login claude C-WORK
+
+ai add claude work C-WORK company && ai login claude C-WORK   # Claude 계정 추가
+ai add codex  work G-WORK company && ai login codex  G-WORK   # GPT(Codex) 계정 추가
+
+ai claude C-WORK      # 이 세션은 회사 Claude로
+ai codex  G-WORK      # 이 세션은 회사 GPT로
 ```
 
-tmux 안에서 `claude`를 켜고 프롬프트에 아래 한 줄을 넣으면 띠가 생깁니다(`y` → `user` 선택).
+여기까지만으로 두 도구 모두 세션별 계정 지정이 됩니다. 입력창 위 띠(남은 한도 표·클릭 전환)를 원하면 tmux 안에서 `claude`를 켜고 아래 한 줄을 넣으세요(`y` → `user` 선택).
 
 ```text
 /plugin install ai-accounts --marketplace mcpysup-netizen/claude-ai-accounts
@@ -54,47 +59,45 @@ tmux 안에서 `claude`를 켜고 프롬프트에 아래 한 줄을 넣으면 �
 
 <p align="center"><img src="docs/images/limit.jpg" alt="종이 인형이 닫힌 문 앞에서 멈춰 있고, 옆의 세로 게이지는 비어 있다. 건너편 길 끝에는 가득 찬 주황 게이지가 있지만 건너갈 다리가 없다" width="88%"></p>
 
-구독을 여러 개 쓰면 계정을 고르고 싶은 순간이 두 가지로 생깁니다.
+Claude와 ChatGPT 구독을 여러 개 쓰면 계정을 고르고 싶은 순간이 두 가지로 생깁니다.
 
-**하나는 세션마다 쓸 계정이 정해져 있을 때예요.** 회사 저장소 작업은 회사 계정으로, 개인 프로젝트는 개인 계정으로 돌리고 싶죠. 그런데 Claude Code 로그인은 PC 전체에 하나라서, 바꾸는 순간 열어 둔 다른 세션까지 같이 바뀌었습니다. 세션마다 계정을 나눠 둘 방법이 없었어요.
+**하나는 세션마다 쓸 계정이 정해져 있을 때예요.** 회사 저장소 작업은 회사 계정으로, 개인 프로젝트는 개인 계정으로 돌리고 싶죠. 그런데 Claude Code도 Codex도 로그인은 PC 전체에 하나(`~/.claude`, `~/.codex`)라서, 바꾸는 순간 열어 둔 다른 세션까지 같이 바뀌었습니다. 세션마다 계정을 나눠 둘 방법이 없었어요.
 
-**다른 하나는 한도가 찼을 때예요.** 한 계정의 5시간 한도가 차면 그 세션은 멈춥니다. 다른 계정은 넉넉한데도 넘어가려면 `/logout`, `/login`, 브라우저 승인을 다시 거쳐야 했고, 하던 대화도 끊겼어요.
+**다른 하나는 한도가 찼을 때예요.** Claude도 Codex도 5시간·주간 한도가 있고, 차면 그 세션은 멈춥니다. 다른 계정은 넉넉한데도 넘어가려면 로그아웃, 로그인, 브라우저 승인을 다시 거쳐야 했어요.
 
-이 도구는 두 경우를 같은 방식으로 풉니다. 세션을 띄울 때 `ai claude <계정>`으로 계정을 정하고, 도중에 바꿔야 하면 띠에서 이름을 누르면 돼요. Claude 2계정과 GPT 2계정을 매일 이렇게 나눠 쓰려고 만든 도구를 공개용으로 정리했고, 아래 함정은 대부분 직접 겪은 것입니다.
+이 도구는 두 경우를 같은 방식으로 풉니다. 세션을 띄울 때 `ai claude <계정>`이나 `ai codex <계정>`으로 계정을 정하고, 도중에 바꿔야 하면 띠에서 이름을 누르면 돼요. Claude 2계정과 GPT 2계정을 매일 이렇게 나눠 쓰려고 만든 도구를 공개용으로 정리했고, 아래 함정은 대부분 직접 겪은 것입니다.
 
 ## 설정은 함께, 로그인만 따로
 
 <p align="center"><img src="docs/images/how-it-works.svg" alt="공용 ~/.claude 상자(설정·훅, 메모리·대화 기록, 플러그인·스킬, MCP 설정)를 계정 상자 C-MAIN, C-WORK, G-MAIN·G-WORK가 링크로 가리키는 구조도" width="100%"></p>
 
-Claude Code는 `CLAUDE_CONFIG_DIR`로 설정 폴더를 바꿀 수 있어요([공식 문서](https://code.claude.com/docs/en/env-vars)). 그런데 계정마다 폴더를 통째로 나누면 **훅·메모리·플러그인·MCP 설정까지 조용히 갈라집니다.** 계정 A에서 고친 훅이 계정 B에선 안 돌고, B 세션은 지난주 메모리를 모르게 돼요.
+두 도구 모두 로그인 폴더를 환경변수로 옮길 수 있어요. Claude Code는 `CLAUDE_CONFIG_DIR`([공식 문서](https://code.claude.com/docs/en/env-vars)), Codex는 `CODEX_HOME`([공식 문서](https://learn.chatgpt.com/docs/config-file/config-advanced))입니다. 그런데 계정마다 폴더를 통째로 나누면 **설정까지 조용히 갈라집니다.** 계정 A에서 고친 훅이나 `AGENTS.md`가 계정 B에선 안 먹고, B 세션은 지난주 메모리를 모르게 돼요.
 
-그래서 계정 폴더엔 **로그인 파일만 진짜로 두고, 나머지는 `~/.claude`를 가리키는 링크**로 채웁니다.
+그래서 계정 폴더엔 **로그인 파일만 진짜로 두고, 나머지는 원래 폴더를 가리키는 링크**로 채웁니다.
 
 ```text
-~/.claude-accounts/work/
-├── .credentials.json     ← 이 계정 로그인 (Claude가 직접 씀)
-├── .claude.json          ← 공용 설정 복사본 + 이 계정 정보 키만 보존
-└── settings.json, projects/, plugins/, ...  → ~/.claude/... (링크)
+~/.claude-accounts/work/                      ~/.codex-accounts/work/
+├── .credentials.json   ← Claude 로그인        ├── auth.json        ← Codex 로그인
+├── .claude.json        ← 계정 키만 보존        ├── sessions/        ← 이 계정 대화 기록
+└── settings.json, projects/, plugins/ ...    └── config.toml, AGENTS.md, skills/ ...
+      → ~/.claude/... (링크)                         → ~/.codex/... (링크)
 ```
 
-`.claude.json`만 복사본인 이유는 MCP 서버 목록 같은 공용 설정과 "누구로 로그인했나" 같은 계정 정보가 한 파일에 섞여 있어서예요. 실행할 때마다 공용 설정을 새로 복사하고, 계정 키(`oauthAccount` 등)만 그 계정 것으로 남깁니다.
-
-Codex도 같은 원리로 계정마다 `CODEX_HOME`을 주고([공식 문서](https://learn.chatgpt.com/docs/config-file/config-advanced)), `config.toml`·`AGENTS.md`·스킬·규칙은 `~/.codex`로 링크합니다. 평소 쓰던 기본 로그인(`~/.claude`, `~/.codex`)은 손대지 않아요.
+Claude 쪽 `.claude.json`만 복사본인 이유는 MCP 서버 목록 같은 공용 설정과 "누구로 로그인했나" 같은 계정 정보가 한 파일에 섞여 있어서예요. 실행할 때마다 공용 설정을 새로 복사하고, 계정 키(`oauthAccount` 등)만 그 계정 것으로 남깁니다. Codex는 대화 기록(`sessions/`)이 계정 폴더마다 따로 쌓여요. 평소 쓰던 기본 로그인(`~/.claude`, `~/.codex`)은 손대지 않습니다.
 
 <p align="center"><img src="docs/images/shared.jpg" alt="큰 종이 서랍장 앞에 작은 금고 세 개가 각자 열쇠를 꽂고 있고, 그중 주황 금고 하나만 열려 서랍장과 실로 이어져 있다" width="88%"></p>
 
-## 같은 자리에서 계정만 바꿔 다시 시작
+## 도중에 계정 바꾸기
 
 <p align="center"><img src="docs/images/swap.jpg" alt="같은 터미널 창 두 개가 원형 화살표로 이어져 있다. 대화 말풍선은 그대로인데 창 위쪽 이름표만 회색에서 주황으로 바뀌었다" width="88%"></p>
 
-실행 중인 Claude 세션의 로그인은 밖에서 바꿀 수 없어요. 그래서 바꾸지 않고 **같은 자리에서 다시 띄웁니다.** 띠에서 다른 Claude 계정을 누르면 이렇게 돼요.
+실행 중인 세션의 로그인은 밖에서 바꿀 수 없어요. 그래서 도구마다 방법이 다릅니다.
 
-1. `ai swap`이 지금 tmux 칸의 `claude` 프로세스를 찾아 원래 실행 인자(권한 모드 등)를 읽습니다.
-2. 0.5초 뒤 같은 칸을 `ai claude <새 계정> <원래 인자> --resume <이 세션>`으로 다시 띄워요.
+**Claude Code 세션: 같은 칸에서 다시 띄우고 대화를 이어 갑니다.** 띠에서 다른 Claude 계정을 누르면 `ai swap`이 지금 tmux 칸의 `claude` 프로세스에서 원래 실행 인자(권한 모드 등)를 읽고, 0.5초 뒤 그 칸을 `ai claude <새 계정> <원래 인자> --resume <이 세션>`으로 다시 띄워요. 창 배치, 권한 모드, 대화는 그대로이고 로그인만 바뀝니다.
 
-창 배치, 권한 모드, 대화는 그대로이고 로그인만 바뀝니다. 0.5초를 기다리는 건, 지금 Claude가 "전환 시작" 응답을 받기 전에 꺼지면 실패로 보이기 때문이에요.
+**Claude 안에서 부르는 Codex: 다시 띄울 필요도 없어요.** 띠에서 GPT 이름을 누르면 다음 Codex 호출부터 그 계정으로 돕니다. Codex 플러그인은 같은 폴더의 세션들이 중계 프로세스 하나를 같이 써서 먼저 띄운 세션의 계정으로 돌 수 있거든요. 그래서 Codex를 부르는 명령 앞에 이 세션의 `CODEX_HOME`을 붙이고, 계정마다 중계 프로세스를 따로 띄웁니다.
 
-**GPT 계정은 다시 띄울 필요가 없어요.** 띠에서 GPT 이름을 누르면 다음 Codex 호출부터 그 계정으로 돕니다. Codex 플러그인은 같은 폴더의 세션들이 중계 프로세스 하나를 같이 써서 먼저 띄운 세션의 계정으로 돌 수 있어요. 그래서 Codex를 부르는 명령 앞에 이 세션의 `CODEX_HOME`을 붙이고, 계정마다 중계 프로세스를 따로 띄웁니다.
+**따로 띄운 Codex 세션: 새 계정으로 다시 띄웁니다.** `/exit` 후 `ai codex <새 계정>`으로 열면 돼요. 다만 대화 기록이 계정 폴더마다 따로라서, 다른 계정으로 옮기면 하던 대화를 이어받지 못하고 새로 시작합니다. 같은 계정 안에서는 `ai codex G-WORK resume`으로 이어 갈 수 있어요.
 
 ## 남은 한도 숫자는 어디서 오나
 
@@ -116,8 +119,8 @@ Codex도 같은 원리로 계정마다 `CODEX_HOME`을 주고([공식 문서](ht
 | Linux 또는 WSL | 같은 칸 전환이 `/proc`을 씁니다. macOS 미지원 |
 | `python3`, `bash` | |
 | [Claude Code](https://code.claude.com/docs) 2.1.29x | 모드(플러그인 훅) 기능, 2.1.295에서 확인 |
-| `tmux` | 클릭 전환용. 없어도 `ai claude <계정>`은 됩니다 |
-| Codex CLI (선택) | GPT 계정을 쓸 때만 |
+| `tmux` | 클릭 전환용. 없어도 `ai claude`·`ai codex`는 됩니다 |
+| Codex CLI | GPT 계정을 쓸 때 |
 
 **1. 설치.** `./install.sh`는 `~/.local/bin/ai`를 만들고 등록부(`~/.config/ai-accounts/accounts.json`)를 생성합니다. 지금 로그인된 계정은 `C-MAIN`, `G-MAIN`으로 등록돼요. 다시 실행해도 안전하고, 기존 등록부와 상태줄은 덮어쓰지 않습니다.
 
@@ -140,17 +143,14 @@ ai login codex G-WORK
 
 ## 사용법
 
-| 하고 싶은 것 | 명령 |
-|---|---|
-| 이 세션은 처음부터 회사 계정으로 | `ai claude C-WORK` |
-| Claude는 C-WORK, Codex는 G-MAIN | `ai claude C-WORK gpt:G-MAIN` |
-| 기존 대화를 다른 계정으로 이어가기 | `ai claude C-WORK --resume <세션ID>` |
-| Codex를 특정 계정으로 | `ai codex G-WORK` |
-| 전 계정 남은 한도 | `ai status` |
-| 지금 칸을 다른 계정으로 | 띠에서 이름 클릭, 또는 `/ai C-WORK` |
-| 도넛 그래프 패널 | `/ai` |
+| 하고 싶은 것 | Claude Code | Codex |
+|---|---|---|
+| 이 세션은 처음부터 회사 계정으로 | `ai claude C-WORK` | `ai codex G-WORK` |
+| 기존 대화 이어가기 | `ai claude C-WORK --resume <세션ID>` | `ai codex G-WORK resume` |
+| Claude 안에서 부를 Codex 계정도 같이 정하기 | `ai claude C-WORK gpt:G-MAIN` | |
+| 도중에 다른 계정으로 | 띠에서 이름 클릭, 또는 `/ai C-WORK` | Claude 안: 띠에서 G- 이름 클릭 / 단독: `ai codex <계정>`으로 다시 |
 
-`ai claude` 뒤의 나머지 인자는 그대로 `claude`에 전달됩니다.
+두 도구 공통으로 `ai status`는 전 계정 남은 한도를 표로, `/ai`는 도넛 그래프 패널을 보여 줘요. `ai claude`·`ai codex` 뒤의 나머지 인자는 그대로 `claude`·`codex`에 전달됩니다.
 
 ## 보안
 
@@ -167,12 +167,14 @@ ai login codex G-WORK
 
 - **MCP 로그인은 계정마다 따로예요.** MCP *설정*은 공유되지만 *로그인 토큰*은 계정의 `.credentials.json`에 들어갑니다. 새 계정으로 자동화를 돌렸다가 MCP 로그인이 없어 멈춘 적이 있어요. 새 계정은 한 번 `/mcp`에서 필요한 서버에 로그인하세요.
 - **claude.ai 커넥터(Gmail, Drive 등)는 계정에 붙어 있어요.** 로컬 MCP와 달리 그 계정에서 연결한 것만 보입니다.
+- **따로 띄운 Codex는 계정을 옮기면 대화가 안 이어져요.** 대화 기록이 계정 폴더(`~/.codex-accounts/<id>/sessions`)마다 따로라서입니다. 긴 작업은 시작할 때 계정을 정해 두세요.
 - **띠를 눌러도 반응이 없으면** `~/.tmux.conf`에 `set -g mouse on`이 있는지 확인하세요. tmux 밖 세션은 같은 칸 전환 대신 수동 방법을 알려 줍니다.
 
 ## 한계
 
 - macOS, Windows 네이티브는 아직 안 됩니다(WSL은 됨).
-- 안 쓰는 Claude 계정의 한도는 실시간으로 못 봐요.
+- 안 쓰는 Claude 계정의 한도는 실시간으로 못 봐요(Codex는 1분마다 실시간).
+- 띠·클릭 전환은 Claude Code 화면에만 붙어요. Codex 단독 화면에는 띠가 없어서 `ai status`로 확인합니다.
 - Claude Code 모드 기능은 초기 단계(early access)라 버전이 오르면 깨질 수 있습니다. 이슈로 알려 주세요.
 
 ## 제거
