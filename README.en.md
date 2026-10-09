@@ -23,8 +23,9 @@
 
 ## At a glance
 
-- Run **session A on your work account and session B on your personal one** at the same time, with no logout and login dance.
-- Remaining **5-hour and 7-day limits plus reset times** for every account sit above the prompt. Click a name and **the same pane restarts on that account, with the same conversation.**
+- **Pin an account per session.** Work repo on the work account, side project on your personal one: sessions A and B run on different accounts at the same time, with no logout and login dance.
+- **Switch in place when a limit runs out.** Move to an account with room left and keep the same conversation.
+- Remaining **5-hour and 7-day limits plus reset times** for every account sit above the prompt. Click a name and the same pane restarts on that account.
 - Hooks, memory, plugins and MCP settings are **shared by every account**. Only the login files are per account.
 - No undocumented APIs, and the tool never reads or stores your tokens.
 
@@ -53,9 +54,13 @@ Then start `claude` inside tmux and type this at the prompt (answer `y`, then pi
 
 <p align="center"><img src="docs/images/en/limit.jpg" alt="A paper figure stops at a closed door next to an empty fuel gauge, while a full orange gauge sits across a gap with no bridge" width="88%"></p>
 
-When one Claude account hits its 5-hour limit, that session stops. Another account may have plenty left, but getting there meant `/logout`, `/login` and a browser approval. Worse, the login is machine-wide, so switching also switched every other open session.
+With several subscriptions, there are two moments when you want to choose the account.
 
-I built this to juggle two Claude and two ChatGPT subscriptions every day, then cleaned it up for others. Most pitfalls below are ones I actually hit.
+**Some sessions should always run on a specific account.** Company repos on the company account, personal projects on your own. But the Claude Code login is machine-wide, so switching it also switched every other open session. There was no way to give each session its own account.
+
+**And sometimes a limit runs out.** When one account hits its 5-hour limit, that session stops. Another account may have plenty left, but getting there meant `/logout`, `/login`, a browser approval and a broken conversation.
+
+This tool handles both the same way: pick the account when you start a session with `ai claude <account>`, and click a name in the strip if you need to change it midway. I built it to split two Claude and two ChatGPT subscriptions like this every day, then cleaned it up for others. Most pitfalls below are ones I actually hit.
 
 ## Shared settings, separate logins
 
@@ -137,7 +142,7 @@ ai login codex G-WORK
 
 | To | Run |
 |---|---|
-| start a session on a Claude account | `ai claude C-WORK` |
+| run this session on the work account from the start | `ai claude C-WORK` |
 | Claude on C-WORK, Codex on G-MAIN | `ai claude C-WORK gpt:G-MAIN` |
 | continue a chat on another account | `ai claude C-WORK --resume <session-id>` |
 | run Codex on an account | `ai codex G-WORK` |
