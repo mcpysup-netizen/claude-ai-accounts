@@ -1,0 +1,16 @@
+{
+  "name": "claude-ai-accounts",
+  "owner": {
+    "name": "mcpysup-netizen"
+  },
+  "metadata": {
+    "description": "Claude Code·Codex 구독 계정 스위치 모드"
+  },
+  "plugins": [
+    {
+      "name": "ai-accounts",
+      "source": "./mod",
+      "description": "Claude·Codex 구독 계정별 남은 한도 띠 + 계정 전환"
+    }
+  ]
+}

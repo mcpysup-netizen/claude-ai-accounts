@@ -1,0 +1,17 @@
+{
+  "_note": "예시: Claude 2계정 + GPT 2계정. auth=default 는 평소 ~/.claude 로그인, configdir 는 계정별 로그인 폴더.",
+  "claude": {
+    "default": "main",
+    "accounts": {
+      "main": { "name": "C-MAIN", "owner": "personal", "auth": "default", "plan": "Max" },
+      "work": { "name": "C-WORK", "owner": "company", "auth": "configdir", "dir": "~/.claude-accounts/work", "plan": "Max" }
+    }
+  },
+  "codex": {
+    "default": "main",
+    "accounts": {
+      "main": { "name": "G-MAIN", "owner": "personal", "home": "~/.codex", "plan": "Plus" },
+      "work": { "name": "G-WORK", "owner": "company", "home": "~/.codex-accounts/work", "plan": "Pro" }
+    }
+  }
+}

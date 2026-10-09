@@ -1,0 +1,9 @@
+# 엔진이 로드 때 생성하는 타입(이 PC의 MCP 도구 목록이 들어감) , 절대 커밋 금지
+mod/.claude-plugin/types/
+node_modules/
+__pycache__/
+*.pyc
+*.tmp
+.env*
+*.token
+*.log

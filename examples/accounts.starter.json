@@ -1,0 +1,15 @@
+{
+  "_note": "비밀값을 넣지 마세요. 로그인 정보는 각 도구가 계정 폴더(dir/home)에 직접 저장합니다.",
+  "claude": {
+    "default": "main",
+    "accounts": {
+      "main": { "name": "C-MAIN", "owner": "personal", "auth": "default" }
+    }
+  },
+  "codex": {
+    "default": "main",
+    "accounts": {
+      "main": { "name": "G-MAIN", "owner": "personal", "home": "~/.codex" }
+    }
+  }
+}

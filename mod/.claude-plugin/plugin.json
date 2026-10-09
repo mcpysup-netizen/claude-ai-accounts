@@ -1,0 +1,7 @@
+{
+  "name": "ai-accounts",
+  "version": "0.2.0",
+  "description": "Claude·Codex 구독 계정별 남은 한도 띠 + 클릭 한 번 계정 전환(같은 tmux 칸에서 대화 이어가기)",
+  "author": { "name": "mcpysup-netizen" },
+  "types": "./types/index.d.ts"
+}

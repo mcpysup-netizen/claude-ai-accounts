@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+# AI 구독 계정 스위치. 세션마다 Claude·Codex(GPT) 계정을 골라 띄운다.
+#   ai claude [계정] [gpt:계정] [claude 인자...]   예) ai claude work gpt:personal --resume <세션ID>
+#   ai codex  [계정] [codex 인자...]               예) ai codex work
+#   ai add claude|codex <id> <표시명> [company|personal] [요금제]   계정 등록
+#   ai login claude|codex <계정>                    계정별 최초 1회 로그인
+#   ai status | ai json                             전 계정 남은 한도 (표 / JSON)
+# 등록부: ~/.config/ai-accounts/accounts.json (비밀값 없음). 로그인 정보는 각 도구가 계정 폴더에 직접 저장한다.
+set -euo pipefail
+REG="$HOME/.config/ai-accounts/accounts.json"
+LIB="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+
+claude_exe() { command -v claude 2>/dev/null || echo "$HOME/.local/bin/claude"; }
+codex_exe() {
+  local c; c="$(command -v codex 2>/dev/null || true)"
+  [ -z "$c" ] && c="$(ls -1d "$HOME"/.nvm/versions/node/*/bin/codex 2>/dev/null | sort -V | tail -1 || true)"
+  echo "${c:-codex}"
+}
+
+[ -f "$REG" ] || [ "${1:-}" = "help" ] || { echo "등록부가 없습니다: $REG (install.sh를 먼저 실행하세요)" >&2; exit 1; }
+
+# 등록부 조회. 인자는 sys.argv로만 넘긴다(셸 문자열을 코드에 끼워 넣지 않음).
+reg() { python3 - "$REG" "$@" <<'PY'
+import json, os, sys
+r = json.load(open(sys.argv[1])); op, *a = sys.argv[2:]
+acc = lambda t: r.get(t, {}).get("accounts", {})
+if op == "default": print(r[a[0]]["default"])
+elif op == "has": print("1" if a[1] in acc(a[0]) else "")
+elif op == "list": print(" ".join(v["name"] for v in acc(a[0]).values()))
+elif op == "resolve": print(next((k for k, v in acc(a[0]).items() if k == a[1] or v["name"].lower() == a[1].lower()), a[1]))
+elif op == "get": print(acc(a[0])[a[1]].get(a[2], ""))
+elif op == "path": print(os.path.expanduser(acc(a[0])[a[1]].get(a[2], a[3] if len(a) > 3 else "")))
+PY
+}
+has_acc() { [[ "$2" =~ ^[a-z0-9_-]+$ ]] && [ -n "$(reg has "$1" "$2")" ]; }
+
+prepare_codex_home() {  # 별도 home: 설정은 공용 ~/.codex에 링크, auth.json·sessions는 계정별
+  local home="$1"
+  [ "$home" = "$HOME/.codex" ] && { mkdir -p "$home"; return 0; }
+  mkdir -p "$home"; chmod 700 "$home"
+  for f in config.toml AGENTS.md skills rules plugins memories; do
+    [ -e "$HOME/.codex/$f" ] && [ ! -e "$home/$f" ] && ln -s "$HOME/.codex/$f" "$home/$f"
+  done
+  return 0
+}
+
+set_codex_env() {
+  local acc="$1"
+  has_acc codex "$acc" || { echo "codex 계정 없음: $acc (있는 것: $(reg list codex))" >&2; exit 1; }
+  local home; home="$(reg path codex "$acc" home "~/.codex")"
+  prepare_codex_home "$home"
+  export AI_CODEX_ACCOUNT="$acc" CODEX_HOME="$home"
+}
+
+# 계정 폴더 동기화: ~/.claude 항목은 링크로 공유(훅·메모리·설정·플러그인),
+# 로그인 파일과 .claude.json의 계정 키만 계정별로 둔다.
+sync_config_dir() {
+  local dir="$1"
+  mkdir -p "$dir" "$dir/session-env" "$dir/sessions"; chmod 700 "$dir"
+  local f
+  for f in $(ls -A "$HOME/.claude"); do
+    case "$f" in .credentials.json|daemon|daemon.lock|daemon.log|daemon.status.json|daemon-auth-status.json|daemon-auth-cooldown|.last-update-result.json*|session-env|sessions) continue;; esac
+    [ -e "$dir/$f" ] || [ -L "$dir/$f" ] || ln -s "$HOME/.claude/$f" "$dir/$f"
+  done
+  python3 - "$dir" <<'PY'
+import json, os, sys
+d = sys.argv[1]; dst_p = os.path.join(d, ".claude.json")
+try:
+    src = json.load(open(os.path.expanduser("~/.claude.json")))
+except Exception:
+    src = {}
+try:
+    dst = json.load(open(dst_p))
+except Exception:
+    dst = {}
+keep = {"oauthAccount", "userID", "primaryApiKey", "customApiKeyResponses", "claudeAiMcpEverConnected"}
+out = {k: v for k, v in src.items() if k not in keep}
+out.update({k: dst[k] for k in keep if k in dst})
+tmp = dst_p + ".tmp"
+with open(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+    json.dump(out, f, ensure_ascii=False)
+os.replace(tmp, dst_p)
+PY
+}
+
+set_claude_env() {
+  local acc="$1"
+  has_acc claude "$acc" || { echo "claude 계정 없음: $acc (있는 것: $(reg list claude))" >&2; exit 1; }
+  export AI_CLAUDE_ACCOUNT="$acc"
+  unset CLAUDE_CODE_OAUTH_TOKEN CLAUDE_CONFIG_DIR
+  if [ "$(reg get claude "$acc" auth)" = "configdir" ]; then
+    local dir; dir="$(reg path claude "$acc" dir)"
+    sync_config_dir "$dir"
+    export CLAUDE_CONFIG_DIR="$dir"
+  fi
+}
+
+# 첫 인자가 옵션(-…)도 gpt:도 아닌데 등록된 계정이 아니면 오타로 보고 멈춘다(기본 계정으로 조용히 넘어가지 않게).
+need_acc() {
+  local tool="$1" a="${2:-}"
+  [ -z "$a" ] && return 0; [[ "$a" == -* || "$a" == gpt:* ]] && return 0
+  has_acc "$tool" "$(reg resolve "$tool" "$a")" && return 0
+  echo "없는 $tool 계정: $a (있는 것: $(reg list "$tool"))" >&2; exit 1
+}
+
+cmd="${1:-status}"; shift || true
+case "$cmd" in
+  claude)
+    need_acc claude "${1:-}"
+    acc="$(reg default claude)"
+    if [ $# -gt 0 ] && has_acc claude "$(reg resolve claude "$1")"; then acc="$(reg resolve claude "$1")"; shift; fi
+    set_claude_env "$acc"
+    if [ $# -gt 0 ] && [[ "$1" == gpt:* ]]; then set_codex_env "$(reg resolve codex "${1#gpt:}")"; shift
+    else  # 이어받은 GPT 계정이 이 등록부에 없으면 기본값
+      g="${AI_CODEX_ACCOUNT:-}"; has_acc codex "$g" || g="$(reg default codex)"; set_codex_env "$g"; fi
+    exec "$(claude_exe)" "$@" ;;
+  codex)
+    need_acc codex "${1:-}"
+    acc="$(reg default codex)"
+    if [ $# -gt 0 ] && has_acc codex "$(reg resolve codex "$1")"; then acc="$(reg resolve codex "$1")"; shift; fi
+    set_codex_env "$acc"
+    cx="$(codex_exe)"; export PATH="$(dirname "$cx"):$PATH"  # codex는 node 스크립트라 node도 PATH에 필요
+    exec "$cx" "$@" ;;
+  add)
+    tool="${1:-}"; id="${2:-}"; name="${3:-}"; owner="${4:-personal}"; plan="${5:-}"
+    case "$tool" in claude|codex) ;; *) echo "사용법: ai add claude|codex <id> <표시명> [company|personal] [요금제]" >&2; exit 1;; esac
+    [[ "$id" =~ ^[a-z0-9_-]+$ ]] || { echo "id는 영소문자·숫자·-·_ 만" >&2; exit 1; }
+    [[ "$name" =~ ^[A-Za-z0-9._-]{1,12}$ ]] || { echo "표시명은 영문·숫자·.-_ 12자 이내" >&2; exit 1; }
+    case "$owner" in company|personal) ;; *) echo "owner는 company 또는 personal" >&2; exit 1;; esac
+    python3 - "$REG" "$tool" "$id" "$name" "$owner" "$plan" <<'PY'
+import json, os, sys
+p, tool, i, name, owner, plan = sys.argv[1:]
+r = json.load(open(p))
+accs = r[tool]["accounts"]
+if i in accs: sys.exit(f"이미 있는 id: {i}")
+if any(v["name"].lower() == name.lower() for v in accs.values()): sys.exit(f"이미 있는 표시명: {name}")
+row = {"name": name, "owner": owner}
+if tool == "claude": row.update(auth="configdir", dir=f"~/.claude-accounts/{i}")
+else: row["home"] = f"~/.codex-accounts/{i}"
+if plan: row["plan"] = plan
+accs[i] = row
+tmp = p + ".tmp"
+with open(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f: json.dump(r, f, ensure_ascii=False, indent=2)
+os.replace(tmp, p)
+print(f"등록됨: {tool} {name}. 다음: ai login {tool} {name}")
+PY
+    ;;
+  json)  # 모드용: 전 계정 스냅숏 JSON (비밀값 없음)
+    python3 "$LIB/ai_usage_lib.py" json ;;
+  status)
+    python3 "$LIB/ai_usage_lib.py" status ;;
+  record)  # 상태줄 스크립트에서: stdin = 상태줄 입력 JSON
+    python3 "$LIB/ai_usage_line.py" ;;
+  swap)  # 모드 내부용: 지금 tmux 칸에서 다른 Claude 계정으로 다시 띄우기
+    exec python3 "$LIB/ai_swap.py" "$@" ;;
+  login)
+    tool="${1:-}"; acc="${2:-}"; [ -n "$tool" ] && [ -n "$acc" ] && acc="$(reg resolve "$tool" "$acc" 2>/dev/null || echo "$acc")"
+    case "$tool" in
+      claude)
+        has_acc claude "$acc" || { echo "사용법: ai login claude <$(reg list claude)>" >&2; exit 1; }
+        name="$(reg get claude "$acc" name)"
+        if [ "$(reg get claude "$acc" auth)" = "configdir" ]; then
+          dir="$(reg path claude "$acc" dir)"; sync_config_dir "$dir"
+          echo "[$name 로그인] Claude가 뜨면 /login → 브라우저에서 $name 계정으로 승인, 끝나면 /exit"
+          CLAUDE_CONFIG_DIR="$dir" AI_CLAUDE_ACCOUNT="$acc" "$(claude_exe)"; exit 0
+        fi
+        echo "$name 은 기본 로그인(~/.claude) 계정입니다. 평소처럼 claude 에서 /login 하세요." ;;
+      codex)
+        has_acc codex "$acc" || { echo "사용법: ai login codex <$(reg list codex)>" >&2; exit 1; }
+        set_codex_env "$acc"
+        echo "CODEX_HOME=$CODEX_HOME 에 로그인합니다. 브라우저에서 이 계정으로 승인하세요."
+        cx="$(codex_exe)"; export PATH="$(dirname "$cx"):$PATH"
+        "$cx" login ;;
+      *) echo "사용법: ai login claude|codex <계정>" >&2; exit 1 ;;
+    esac ;;
+  *) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; [ "$cmd" = help ] || exit 1 ;;
+esac
