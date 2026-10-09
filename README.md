@@ -74,7 +74,7 @@ Claude Code는 `CLAUDE_CONFIG_DIR`로 설정 폴더를 바꿀 수 있어요([공
 
 `.claude.json`만 복사본인 이유는 MCP 서버 목록 같은 공용 설정과 "누구로 로그인했나" 같은 계정 정보가 한 파일에 섞여 있어서예요. 실행할 때마다 공용 설정을 새로 복사하고, 계정 키(`oauthAccount` 등)만 그 계정 것으로 남깁니다.
 
-Codex도 같은 원리로 계정마다 `CODEX_HOME`을 주고([공식 문서](https://developers.openai.com/codex/config-advanced)), `config.toml`·`AGENTS.md`·스킬·규칙은 `~/.codex`로 링크합니다. 평소 쓰던 기본 로그인(`~/.claude`, `~/.codex`)은 손대지 않아요.
+Codex도 같은 원리로 계정마다 `CODEX_HOME`을 주고([공식 문서](https://learn.chatgpt.com/docs/config-file/config-advanced)), `config.toml`·`AGENTS.md`·스킬·규칙은 `~/.codex`로 링크합니다. 평소 쓰던 기본 로그인(`~/.claude`, `~/.codex`)은 손대지 않아요.
 
 <p align="center"><img src="docs/images/shared.jpg" alt="큰 종이 서랍장 앞에 작은 금고 세 개가 각자 열쇠를 꽂고 있고, 그중 주황 금고 하나만 열려 서랍장과 실로 이어져 있다" width="88%"></p>
 
@@ -96,7 +96,7 @@ Codex도 같은 원리로 계정마다 `CODEX_HOME`을 주고([공식 문서](ht
 | | 출처 | 갱신 |
 |---|---|---|
 | **Claude** | 상태줄 입력의 `rate_limits` ([공식 문서](https://code.claude.com/docs/en/statusline)) | 그 계정으로 세션을 쓸 때만 |
-| **Codex** | `codex app-server`의 `account/rateLimits/read` ([공식 문서](https://developers.openai.com/codex/app-server)) | 1분마다, 한도 소모 없음 |
+| **Codex** | `codex app-server`의 `account/rateLimits/read` ([공식 문서](https://learn.chatgpt.com/docs/app-server)) | 1분마다, 한도 소모 없음 |
 
 둘 다 서버가 준 **계정 전체 값**이라 다른 PC에서 쓴 양도 반영돼요. 다만 Claude는 공식 경로로 안 쓰는 계정을 물어볼 방법이 없어서 **마지막으로 본 값**을 보여 줍니다. 1시간이 지난 값은 흐리게 표시하고 이름 옆에 `3h전`처럼 경과 시간을 붙여요.
 
@@ -196,7 +196,7 @@ Claude Code에서 `/plugin uninstall ai-accounts`로 모드를 지웁니다. 등
 - [Claude Code, Status line](https://code.claude.com/docs/en/statusline): 상태줄 입력의 `rate_limits`
 - [Claude Code, Environment variables](https://code.claude.com/docs/en/env-vars): `CLAUDE_CONFIG_DIR`
 - [Claude Code, Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces): GitHub 저장소로 플러그인 설치
-- [Codex, Advanced configuration](https://developers.openai.com/codex/config-advanced): `CODEX_HOME`
-- [Codex, App server](https://developers.openai.com/codex/app-server): `account/rateLimits/read`
+- [Codex, Advanced configuration](https://learn.chatgpt.com/docs/config-file/config-advanced): `CODEX_HOME`
+- [Codex, App server](https://learn.chatgpt.com/docs/app-server): `account/rateLimits/read`
 
 일러스트 4장은 AI로 만든 설명용 그림이고, 실행 화면은 시연용 가짜 계정으로 찍었습니다. · MIT License

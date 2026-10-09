@@ -74,7 +74,7 @@ So an account folder holds **only the login file for real; everything else is a 
 
 `.claude.json` is the one copy, because it mixes shared settings (like the MCP server list) with "who is logged in". Each launch re-copies the shared part and keeps only the account keys (`oauthAccount` and friends).
 
-Codex works the same way: one `CODEX_HOME` per account ([docs](https://developers.openai.com/codex/config-advanced)), with `config.toml`, `AGENTS.md`, skills and rules linked to `~/.codex`. Your existing default logins (`~/.claude`, `~/.codex`) are left untouched.
+Codex works the same way: one `CODEX_HOME` per account ([docs](https://learn.chatgpt.com/docs/config-file/config-advanced)), with `config.toml`, `AGENTS.md`, skills and rules linked to `~/.codex`. Your existing default logins (`~/.claude`, `~/.codex`) are left untouched.
 
 <p align="center"><img src="docs/images/en/shared.jpg" alt="A large paper drawer cabinet with three small safes in front, each with its own key; only the orange safe is open and tied to the cabinet by a string" width="88%"></p>
 
@@ -96,7 +96,7 @@ Layout, permission mode and conversation stay; only the login changes. The half-
 | | Source | Refreshed |
 |---|---|---|
 | **Claude** | `rate_limits` in the status line input ([docs](https://code.claude.com/docs/en/statusline)) | only while you use that account |
-| **Codex** | `account/rateLimits/read` on `codex app-server` ([docs](https://developers.openai.com/codex/app-server)) | every minute, costs no quota |
+| **Codex** | `account/rateLimits/read` on `codex app-server` ([docs](https://learn.chatgpt.com/docs/app-server)) | every minute, costs no quota |
 
 Both are **account-wide values from the server**, so usage on other machines shows up too. Claude, however, offers no official way to ask about an account you are not using, so you see the **last observed value**. Anything older than an hour is dimmed and tagged with its age.
 
@@ -197,7 +197,7 @@ Further reading
 - [Claude Code, Status line](https://code.claude.com/docs/en/statusline): `rate_limits` in the status line input
 - [Claude Code, Environment variables](https://code.claude.com/docs/en/env-vars): `CLAUDE_CONFIG_DIR`
 - [Claude Code, Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces): installing plugins from a GitHub repository
-- [Codex, Advanced configuration](https://developers.openai.com/codex/config-advanced): `CODEX_HOME`
-- [Codex, App server](https://developers.openai.com/codex/app-server): `account/rateLimits/read`
+- [Codex, Advanced configuration](https://learn.chatgpt.com/docs/config-file/config-advanced): `CODEX_HOME`
+- [Codex, App server](https://learn.chatgpt.com/docs/app-server): `account/rateLimits/read`
 
 The four illustrations are AI-generated explainers; the screenshot uses demo accounts. · MIT License
