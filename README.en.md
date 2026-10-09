@@ -69,7 +69,7 @@ This tool handles both the same way: pick the account when you start a session w
 
 ## Shared settings, separate logins
 
-<p align="center"><img src="docs/images/en/how-it-works.svg" alt="Diagram: account boxes C-MAIN, C-WORK and G-MAIN/G-WORK link to one shared ~/.claude box holding settings and hooks, memory and chat history, plugins and skills, and MCP settings" width="100%"></p>
+<p align="center"><img src="docs/images/en/how-it-works.svg" alt="Diagram. Top row, Claude Code: C-MAIN and C-WORK link to a shared ~/.claude (settings and hooks, memory, plugins, MCP settings). Bottom row, Codex: G-MAIN and G-WORK link to a shared ~/.codex (config.toml, AGENTS.md, skills). Only the login is per account" width="100%"></p>
 
 Both tools can move their login folder with an environment variable: `CLAUDE_CONFIG_DIR` for Claude Code ([docs](https://code.claude.com/docs/en/env-vars)) and `CODEX_HOME` for Codex ([docs](https://learn.chatgpt.com/docs/config-file/config-advanced)). But giving each account a whole folder of its own **silently splits your settings too.** A hook or `AGENTS.md` you fix on account A never applies on account B, and B forgets last week's memory.
 

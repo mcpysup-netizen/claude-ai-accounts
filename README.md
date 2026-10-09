@@ -69,7 +69,7 @@ Claude와 ChatGPT 구독을 여러 개 쓰면 계정을 고르고 싶은 순간�
 
 ## 설정은 함께, 로그인만 따로
 
-<p align="center"><img src="docs/images/how-it-works.svg" alt="공용 ~/.claude 상자(설정·훅, 메모리·대화 기록, 플러그인·스킬, MCP 설정)를 계정 상자 C-MAIN, C-WORK, G-MAIN·G-WORK가 링크로 가리키는 구조도" width="100%"></p>
+<p align="center"><img src="docs/images/how-it-works.svg" alt="구조도. 위 줄은 Claude Code: 공용 ~/.claude(설정·훅, 메모리, 플러그인, MCP 설정)를 C-MAIN과 C-WORK가 가리킨다. 아래 줄은 Codex: 공용 ~/.codex(config.toml, AGENTS.md, 스킬)를 G-MAIN과 G-WORK가 가리킨다. 계정 폴더엔 로그인만 따로 있다" width="100%"></p>
 
 두 도구 모두 로그인 폴더를 환경변수로 옮길 수 있어요. Claude Code는 `CLAUDE_CONFIG_DIR`([공식 문서](https://code.claude.com/docs/en/env-vars)), Codex는 `CODEX_HOME`([공식 문서](https://learn.chatgpt.com/docs/config-file/config-advanced))입니다. 그런데 계정마다 폴더를 통째로 나누면 **설정까지 조용히 갈라집니다.** 계정 A에서 고친 훅이나 `AGENTS.md`가 계정 B에선 안 먹고, B 세션은 지난주 메모리를 모르게 돼요.
 
